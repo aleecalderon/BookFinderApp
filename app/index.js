@@ -13,6 +13,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      
       <Text style={styles.title}>📚 BookFinder</Text>
 
       <TextInput
@@ -36,8 +37,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
+    color: "#110d50",
   },
   input: {
     borderWidth: 1,

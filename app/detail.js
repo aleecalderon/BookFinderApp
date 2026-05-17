@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function DetailScreen() {
   const { libro } = useLocalSearchParams();
@@ -13,59 +13,103 @@ export default function DetailScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Image
-        source={{
-          uri: data.portada || "https://via.placeholder.com/150",
-        }}
-        style={styles.image}
-      />
+    <ScrollView contentContainerStyle={styles.container}>
+      
+      {/* TARJETA */}
+      <View style={styles.card}>
 
-      <Text style={styles.title}>
-        {data.titulo || "Sin título"}
-      </Text>
+        {/* IMAGEN */}
+        <Image
+          source={{
+            uri:
+              data.portada ||
+              "https://via.placeholder.com/150",
+          }}
+          style={styles.image}
+        />
 
-      <Text style={styles.author}>
-        Autor: {data.autor || "Desconocido"}
-      </Text>
+        {/* TITULO */}
+        <Text style={styles.title}>
+          {data.titulo || "Sin título"}
+        </Text>
 
-      <Text style={styles.description}>
-        {data.descripcion || "Sin descripción disponible"}
-      </Text>
+        {/* AUTOR */}
+        <Text style={styles.author}>
+          ✍️ {data.autor || "Desconocido"}
+        </Text>
+
+        {/* LINEA */}
+        <View style={styles.divider} />
+
+        {/* DESCRIPCION */}
+        <Text style={styles.description}>
+          {data.descripcion || "Sin descripción disponible"}
+        </Text>
+
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 15,
+    flexGrow: 1,
+    backgroundColor: "#f3f4f6",
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  card: {
+    width: "100%",
     backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+
+    elevation: 5,
   },
+
   image: {
-    width: 160,
-    height: 220,
+    width: 180,
+    height: 260,
     alignSelf: "center",
-    marginBottom: 15,
-    borderRadius: 10,
+    borderRadius: 15,
+    marginBottom: 20,
   },
+
   title: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
+    color: "#111827",
     marginBottom: 10,
-    color: "#000",
   },
+
   author: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center",
-    marginBottom: 15,
-    color: "#555",
+    color: "#6b7280",
+    marginBottom: 20,
   },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#d1d5db",
+    marginBottom: 20,
+  },
+
   description: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 28,
+    color: "#374151",
     textAlign: "justify",
-    color: "#333",
   },
 });
