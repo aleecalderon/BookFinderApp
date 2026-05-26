@@ -1,9 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+// Importamos tu pantalla de la cámara subiendo un nivel de carpeta
+import CollectionScreen from "../src/screens/CollectionScreen";
 
 export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>👤 Perfil</Text>
+      {/* Aquí cargamos directamente toda tu interfaz de fotos */}
+      <CollectionScreen />
     </View>
   );
 }
@@ -11,12 +14,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    backgroundColor: "#fff", // Mantenemos el fondo blanco limpio del grupo
   },
 });
