@@ -4,36 +4,36 @@ import { Tabs } from "expo-router";
 export default function Layout() {
   return (
     <Tabs
-  screenOptions={{
-  headerShown: false,
+      screenOptions={{
+        headerShown: false,
 
-  tabBarActiveTintColor: "#6C63FF",
-  tabBarInactiveTintColor: "#9ca3af",
+        tabBarActiveTintColor: "#6C63FF",
+        tabBarInactiveTintColor: "#9ca3af",
 
-  tabBarStyle: {
-    height: 65,
-    paddingBottom: 8,
-    paddingTop: 8,
-    backgroundColor: "#ffffff",
-    borderTopWidth: 0,
+        tabBarStyle: {
+          height: 65,
+          paddingBottom: 8,
+          paddingTop: 8,
+          backgroundColor: "#ffffff",
+          borderTopWidth: 0,
 
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.08,
+          shadowRadius: 5,
 
-    elevation: 10,
-  },
+          elevation: 10,
+        },
 
-  tabBarLabelStyle: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-}}
->
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+      }}
+    >
       {/* HOME */}
       <Tabs.Screen
         name="index"
@@ -67,6 +67,17 @@ export default function Layout() {
         }}
       />
 
+      {/* COLECCIÓN */}
+      <Tabs.Screen
+        name="collection"
+        options={{
+          title: "Colección",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="camera" size={size} color={color} />
+          ),
+        }}
+      />
+
       {/* PERFIL */}
       <Tabs.Screen
         name="profile"
@@ -78,7 +89,7 @@ export default function Layout() {
         }}
       />
 
-      {/* OCULTAS */}
+      {/* PANTALLAS OCULTAS */}
       <Tabs.Screen
         name="results"
         options={{

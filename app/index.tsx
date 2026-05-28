@@ -1,151 +1,360 @@
 // app/index.tsx
+
 import { Picker } from '@react-native-picker/picker';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const PRIMARY_RED = '#E53935'; 
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+const PRIMARY = '#6C63FF';
 
 export default function HomeScreen() {
   const router = useRouter();
-  
-  // Estados para controlar los componentes de captura de filtros
+
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [categoria, setCategoria] = useState('todas');
   const [idioma, setIdioma] = useState('todos');
   const [orden, setOrden] = useState('relevance');
-  
-  // Estado para gestionar los mensajes de alerta en la interfaz
-  const [errorValidacion, setErrorValidacion] = useState('');
+
+  const [errorValidacion, setErrorValidacion] =
+    useState('');
 
   const handleSearch = () => {
     const tituloLimpio = titulo.trim();
     const autorLimpio = autor.trim();
 
-    // --- CONTROL DE VALIDACIONES EXHAUSTIVAS ---
-    
-    // 1. Validar campos completamente vacíos
     if (!tituloLimpio && !autorLimpio) {
-      setErrorValidacion('Por favor, ingresa un criterio. No se permiten búsquedas vacías.');
+      setErrorValidacion(
+        'Ingresa un libro o autor.'
+      );
       return;
     }
 
-    // Expresión regular para identificar números puros (positivos, negativos y ceros)
-    const numeroPuroRegex = /^-?\d+$/;
-
-    // 2. Filtros de validación para el campo Título
-    if (tituloLimpio) {
-      if (tituloLimpio.length < 2) {
-        setErrorValidacion('El título ingresado es muy corto. Digita al menos 2 caracteres.');
-        return;
-      }
-      if (numeroPuroRegex.test(tituloLimpio)) {
-        setErrorValidacion('Búsqueda inválida. El título no puede estar compuesto solo de números.');
-        return;
-      }
-    }
-
-    // 3. Filtros de validación para el campo Autor
-    if (autorLimpio) {
-      if (autorLimpio.length < 2) {
-        setErrorValidacion('El nombre del autor debe tener un mínimo de 2 letras.');
-        return;
-      }
-      if (numeroPuroRegex.test(autorLimpio)) {
-        setErrorValidacion('Búsqueda inválida. El autor no puede ser un valor numérico o negativo.');
-        return;
-      }
-    }
-
-    // Si pasa de forma exitosa los controles de seguridad, limpiamos errores y navegamos
     setErrorValidacion('');
+
     router.push({
-      pathname: "/results",
-      params: { titulo: tituloLimpio, autor: autorLimpio, categoria, idioma, orden }
+      pathname: '/results',
+      params: {
+        titulo: tituloLimpio,
+        autor: autorLimpio,
+        categoria,
+        idioma,
+        orden,
+      },
     });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Stack.Screen 
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <Stack.Screen
         options={{
-          title: "Buscador de Libros",
-          headerStyle: { backgroundColor: PRIMARY_RED },
+          title: 'BookFinder',
+          headerStyle: {
+            backgroundColor: PRIMARY,
+          },
           headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }} 
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
 
-      <Text style={styles.title}>Búsqueda Avanzada</Text>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>
+          📚
+        </Text>
 
-      {/* Renderizado dinámico de la caja de errores */}
-      {errorValidacion ? (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>⚠️ {errorValidacion}</Text>
+        <Text style={styles.title}>
+          BookFinder
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Descubre miles de libros
+          fácilmente.
+        </Text>
+      </View>
+
+      {/* CARD */}
+      <View style={styles.card}>
+        <Text style={styles.label}>
+          Buscar libro
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Ej. El Señor de los Anillos"
+          placeholderTextColor="#9CA3AF"
+          value={titulo}
+          onChangeText={setTitulo}
+        />
+
+        <Text style={styles.label}>
+          Autor
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Ej. Tolkien"
+          placeholderTextColor="#9CA3AF"
+          value={autor}
+          onChangeText={setAutor}
+        />
+
+        {/* BOTÓN */}
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={handleSearch}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.searchButtonText}>
+            🔎 Buscar Libros
+          </Text>
+        </TouchableOpacity>
+
+        {/* ERROR */}
+        {errorValidacion ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>
+              ⚠️ {errorValidacion}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* FILTROS */}
+        <Text style={styles.filterTitle}>
+          Filtros
+        </Text>
+
+        {/* CATEGORÍA */}
+        <View style={styles.filterBox}>
+          <Text style={styles.filterLabel}>
+            📚 Categoría
+          </Text>
+
+          <Picker
+            selectedValue={categoria}
+            onValueChange={(val) =>
+              setCategoria(val)
+            }
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+          >
+            <Picker.Item
+              label="Todas"
+              value="todas"
+            />
+            <Picker.Item
+              label="Ficción"
+              value="fiction"
+            />
+            <Picker.Item
+              label="Computación"
+              value="computers"
+            />
+            <Picker.Item
+              label="Historia"
+              value="history"
+            />
+          </Picker>
         </View>
-      ) : null}
 
-      <Text style={styles.label}>Título del libro:</Text>
-      <TextInput 
-        style={styles.input} 
-        placeholder="Ej. Harry Potter" 
-        value={titulo} 
-        onChangeText={setTitulo} 
-        placeholderTextColor="#999"
-      />
-      
-      <Text style={styles.label}>Autor del libro:</Text>
-      <TextInput 
-        style={styles.input} 
-        placeholder="Ej. J.K. Rowling" 
-        value={autor} 
-        onChangeText={setAutor} 
-        placeholderTextColor="#999"
-      />
+        {/* IDIOMA */}
+        <View style={styles.filterBox}>
+          <Text style={styles.filterLabel}>
+            🌎 Idioma
+          </Text>
 
-      <Text style={styles.label}>Categoría Principal:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker selectedValue={categoria} onValueChange={(val) => setCategoria(val)}>
-          <Picker.Item label="Todas las categorías" value="todas" />
-          <Picker.Item label="Ficción" value="fiction" />
-          <Picker.Item label="Computación / Ingeniería" value="computers" />
-          <Picker.Item label="Historia" value="history" />
-        </Picker>
+          <Picker
+            selectedValue={idioma}
+            onValueChange={(val) =>
+              setIdioma(val)
+            }
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+          >
+            <Picker.Item
+              label="Todos"
+              value="todos"
+            />
+            <Picker.Item
+              label="Español"
+              value="es"
+            />
+            <Picker.Item
+              label="Inglés"
+              value="en"
+            />
+          </Picker>
+        </View>
+
+        {/* ORDEN */}
+        <View style={styles.filterBox}>
+          <Text style={styles.filterLabel}>
+            ✨ Ordenar
+          </Text>
+
+          <Picker
+            selectedValue={orden}
+            onValueChange={(val) =>
+              setOrden(val)
+            }
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+          >
+            <Picker.Item
+              label="Relevancia"
+              value="relevance"
+            />
+            <Picker.Item
+              label="Más recientes"
+              value="newest"
+            />
+          </Picker>
+        </View>
       </View>
-
-      <Text style={styles.label}>Idioma de Preferencia:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker selectedValue={idioma} onValueChange={(val) => setIdioma(val)}>
-          <Picker.Item label="Todos los idiomas" value="todos" />
-          <Picker.Item label="Español" value="es" />
-          <Picker.Item label="Inglés" value="en" />
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>Clasificar por:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker selectedValue={orden} onValueChange={(val) => setOrden(val)}>
-          <Picker.Item label="Mayor Relevancia" value="relevance" />
-          <Picker.Item label="Más recientes primero" value="newest" />
-        </Picker>
-      </View>
-
-      <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-        <Text style={styles.searchButtonText}>EJECUTAR CONSULTA</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flexGrow: 1, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: PRIMARY_RED },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#444' },
-  input: { borderWidth: 1, borderColor: '#ddd', padding: 12, marginBottom: 15, borderRadius: 8, backgroundColor: '#fafafa', color: '#333' },
-  pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 15, backgroundColor: '#fafafa', overflow: 'hidden' },
-  searchButton: { backgroundColor: PRIMARY_RED, padding: 15, borderRadius: 8, alignItems: 'center', marginTop: 15, marginBottom: 40, elevation: 2 },
-  searchButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  errorBox: { backgroundColor: '#FFEBEE', padding: 12, borderRadius: 8, marginBottom: 20, borderWidth: 1, borderColor: '#FFCDD2' },
-  errorText: { color: '#C62828', fontSize: 13, fontWeight: '600', textAlign: 'center' }
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#F4F6FB',
+  },
+
+  header: {
+    backgroundColor: PRIMARY,
+    borderRadius: 28,
+    padding: 30,
+    marginBottom: 20,
+  },
+
+  logo: {
+    fontSize: 42,
+    marginBottom: 10,
+  },
+
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+
+  subtitle: {
+    color: '#E9E7FF',
+    marginTop: 6,
+    fontSize: 15,
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 20,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
+    padding: 15,
+    fontSize: 15,
+    color: '#111827',
+  },
+
+  searchButton: {
+    backgroundColor: PRIMARY,
+    padding: 18,
+    borderRadius: 18,
+    alignItems: 'center',
+    marginTop: 22,
+    marginBottom: 10,
+  },
+
+  searchButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+
+  filterTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 25,
+    marginBottom: 12,
+    color: '#111827',
+  },
+
+  filterBox: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 14,
+    overflow: 'hidden',
+  },
+
+  filterLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 10,
+    marginLeft: 12,
+  },
+
+  picker: {
+    width: '100%',
+    color: '#111827',
+    backgroundColor: '#F9FAFB',
+
+    ...(Platform.OS === 'ios' && {
+      height: 150,
+    }),
+
+    ...(Platform.OS === 'android' && {
+      height: 55,
+    }),
+  },
+
+  pickerItem: {
+    color: '#111827',
+    fontSize: 16,
+  },
+
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderColor: '#FCA5A5',
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 14,
+    marginTop: 14,
+  },
+
+  errorText: {
+    color: '#B91C1C',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 });

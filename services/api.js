@@ -2,88 +2,190 @@
 
 export const fetchBooksAdvanced = async (filtros) => {
   try {
-    let queryParts = [];
+    let query = '';
 
-    if (filtros.titulo) queryParts.push(`title=${encodeURIComponent(filtros.titulo.trim())}`);
-    if (filtros.autor) queryParts.push(`author=${encodeURIComponent(filtros.autor.trim())}`);
-    if (filtros.categoria && filtros.categoria !== 'todas') {
-      queryParts.push(`subject=${encodeURIComponent(filtros.categoria)}`);
+    // Construcción inteligente de búsqueda
+    if (filtros.titulo) {
+      query += ` ${filtros.titulo}`;
     }
 
-    if (queryParts.length === 0) return { items: [], error: "Ingresa al menos un criterio." };
-
-    if (filtros.idioma && filtros.idioma !== 'todos') {
-      const lang = filtros.idioma === 'es' ? 'spa' : 'eng';
-      queryParts.push(`language=${lang}`);
+    if (filtros.autor) {
+      query += ` author:${filtros.autor}`;
     }
 
+    if (
+      filtros.categoria &&
+      filtros.categoria !== 'todas'
+    ) {
+      query += ` subject:${filtros.categoria}`;
+    }
+
+    query = query.trim();
+
+    if (!query) {
+      return {
+        items: [],
+        error:
+          'Ingresa al menos un criterio.',
+      };
+    }
+
+    // URL REAL CORRECTA
+    let url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
+      query
+    )}`;
+
+    // Idioma
+    if (
+      filtros.idioma &&
+      filtros.idioma !== 'todos'
+    ) {
+      const lang =
+        filtros.idioma === 'es'
+          ? 'spa'
+          : 'eng';
+
+      url += `&language=${lang}`;
+    }
+
+    // Orden
     if (filtros.orden === 'newest') {
-      queryParts.push(`sort=new`);
+      url += '&sort=new';
     }
 
-    queryParts.push('limit=10');
+    url += '&limit=12';
 
-    // Conexión a la API real
-    const url = `https://openlibrary.org/search.json?${queryParts.join('&')}`;
+    console.log('URL FINAL:', url);
+
     const response = await fetch(url);
+
     const data = await response.json();
 
-    if (!data.docs || data.docs.length === 0) {
-      return { items: [], error: "No se encontraron libros con esta combinación de filtros." };
+    if (
+      !data.docs ||
+      data.docs.length === 0
+    ) {
+      return {
+        items: [],
+        error:
+          'No se encontraron libros.',
+      };
     }
 
-    const libros = data.docs.map((item, index) => {
-      // Fabricación de descripción garantizada
-      let descLimpia = '';
-      if (item.first_sentence && item.first_sentence.length > 0 && typeof item.first_sentence[0] === 'string') {
-        descLimpia = item.first_sentence[0];
-      } else {
-        const temaPrincipal = item.subject ? item.subject[0] : 'interés general';
-        descLimpia = `Sumérgete en la fascinante historia de "${item.title || 'esta obra'}". Un recorrido increíble a través de sus páginas donde exploraremos temas de ${temaPrincipal}.`;
+    const libros = data.docs.map(
+      (item, index) => {
+        let descLimpia = '';
+
+        if (
+          item.first_sentence &&
+          item.first_sentence.length > 0
+        ) {
+          descLimpia =
+            item.first_sentence[0];
+        } else {
+          descLimpia = `Explora "${item.title ||
+            'esta obra'}", una lectura fascinante llena de aventuras y descubrimientos.`;
+        }
+
+        const portadaUrl = item.cover_i
+          ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg`
+          : null;
+
+        return {
+          id:
+            item.key ||
+            index.toString(),
+
+          titulo:
+            item.title ||
+            'Título desconocido',
+
+          autor: item.author_name
+            ? item.author_name.join(', ')
+            : 'Autor desconocido',
+
+          categoria: item.subject
+            ? item.subject
+                .slice(0, 2)
+                .join(', ')
+            : 'General',
+
+          editorial: item.publisher
+            ? item.publisher[0]
+            : 'Editorial desconocida',
+
+          fecha_publicacion:
+            item.first_publish_year
+              ? item.first_publish_year.toString()
+              : 'Desconocida',
+
+          rating: `${(
+            4 +
+            Math.random()
+          ).toFixed(1)} ⭐`,
+
+          paginas: `${
+            item.number_of_pages_median ||
+            200
+          } págs.`,
+
+          formato:
+            index % 2 === 0
+              ? 'Físico'
+              : 'Digital',
+
+          descripcion: descLimpia,
+
+          portada: portadaUrl,
+        };
       }
+    );
 
-      const portadaUrl = item.cover_i 
-        ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` 
-        : null;
-
-      const ratingBase = item.ratings_average ? (Math.round(item.ratings_average * 10) / 10) : (4.0 + (index % 10) * 0.1); 
-      const paginasSimuladas = item.number_of_pages_median ? item.number_of_pages_median : (150 + (index * 35) % 250);
-      const formatoSimulado = index % 2 === 0 ? 'Tapa Blanda' : 'Digital / ePub';
-
-      return {
-        id: item.key,
-        titulo: item.title || 'Título no disponible',
-        autor: item.author_name ? item.author_name.join(', ') : 'Autor desconocido',
-        categoria: item.subject ? item.subject.slice(0, 2).join(', ') : 'General',
-        editorial: item.publisher ? item.publisher[0] : 'Editorial independiente',
-        fecha_publicacion: item.first_publish_year ? item.first_publish_year.toString() : 'Fecha desconocida',
-        rating: `${ratingBase} ⭐`, 
-        paginas: `${paginasSimuladas} págs.`, 
-        formato: formatoSimulado, 
-        descripcion: descLimpia,
-        portada: portadaUrl
-      };
-    });
-
-    return { items: libros, error: null };
+    return {
+      items: libros,
+      error: null,
+    };
   } catch (error) {
-    return { items: [], error: "Error de red: " + error.message };
+    console.error(error);
+
+    return {
+      items: [],
+      error:
+        'Error de red: ' +
+        error.message,
+    };
   }
 };
 
-export const fetchRecommendations = async (autor) => {
+export const fetchRecommendations = async (
+  autor
+) => {
   try {
-    if (!autor || autor === 'Autor desconocido') return [];
-    
-    const url = `https://openlibrary.org/search.json?author=${encodeURIComponent(autor)}&limit=5`;
+    if (
+      !autor ||
+      autor === 'Autor desconocido'
+    ) {
+      return [];
+    }
+
+    const url = `https://openlibrary.org/search.json?author=${encodeURIComponent(
+      autor
+    )}&limit=5`;
+
     const response = await fetch(url);
+
     const data = await response.json();
 
     if (!data.docs) return [];
 
     return data.docs.map((item) => ({
-      titulo: item.title,
-      ano: item.first_publish_year || 'Desconocido'
+      titulo:
+        item.title ||
+        'Título desconocido',
+
+      ano:
+        item.first_publish_year ||
+        'Desconocido',
     }));
   } catch (error) {
     return [];
